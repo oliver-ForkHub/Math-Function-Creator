@@ -1,15 +1,19 @@
 # Math Function Creator
 
-> 数学函数可视化软件⭐
+[中文版](README_ZH.md)
 
-##  功能
+> A mathematical function visualization application.
 
-- [x] 绘制基本数学函数
-- [x] 绘制隐函数
-- [x] 通过变量改变步长实现动画
-- [x] 内置脚本执行引擎[miniscript](https://github.com/Jerry-Zhu-zty/Mini-script)，可定制函数动画
-  
-## 效果展示
+## Features
+
+- [x] Plot basic mathematical functions
+- [x] Plot implicit functions
+- [x] Create animations by changing the step size through variables
+- [x] Built-in script engine [miniscript](https://github.com/Jerry-Zhu-zty/Mini-script) for customizable function animations
+- [ ] File saving
+
+## Screenshots
+
 ![example](./screenshots/example.png)
 ![implicit](./screenshots/implicit.png)
 ![implicit](./screenshots/implicit2.png)
@@ -17,43 +21,48 @@
 
 ---
 
-##  项目结构
+## Project Structure
 
 ```text
 MFCApplication17/
-  ├── ChildFrm.cpp / .h           # 子窗口框架
-  ├── MainFrm.cpp / .h            # 主窗口框架
-  ├── MFCApplication17.cpp        # 应用入口
-  ├── MFCApplication17Doc.cpp     # 文档类
-  ├── MFCApplication17View.cpp    # 视图类
-  ├── Script.cpp / .h             # 脚本引擎实现
-  ├── Coordinate.cpp / .h         # 坐标/绘图相关逻辑
-  ├── MathExpression.cpp / .h     # 数学表达式处理
-  ├── Variable.cpp / .h           # 变量管理
-  ├── Resource files              # 图标、菜单、对话框资源
-  └── res/                        # 资源文件目录
+  ├── ChildFrm.cpp / .h           # Child frame
+  ├── MainFrm.cpp / .h            # Main frame
+  ├── MFCApplication17.cpp        # Application entry point
+  ├── MFCApplication17Doc.cpp     # Document class
+  ├── MFCApplication17View.cpp    # View class
+  ├── Script.cpp / .h             # Script engine implementation
+  ├── Coordinate.cpp / .h         # Coordinate and plotting logic
+  ├── MathExpression.cpp / .h     # Mathematical expression processing
+  ├── Variable.cpp / .h           # Variable management
+  ├── Resource files              # Icons, menus, and dialog resources
+  └── res/                        # Resource directory
 ```
 
 ---
-## 如何运行
-- Windows中点击.exe文件即可运行程序。
-##  如何编译
 
-### 环境要求
+## How to Run
 
-- Windows 7 或更高版本
-- Visual Studio 2019 或更高版本
-- 已安装 C++ 桌面开发工作负载
-- 已安装 C++ MFC for x64/x86组件
+- On Windows, run the application by opening the `.exe` file.
 
-### 编译步骤
+## How to Build
 
-1. 打开解决方案文件：
-   - MFCApplication17.sln
-2. 选择合适的配置（例如 Debug / x64）
-3. 生成解决方案
-4. 运行生成出的可执行文件
+### Requirements
+
+- Windows 7 or later
+- Visual Studio 2019 or later
+- The Desktop development with C++ workload
+- C++ MFC for x64/x86 components
+
+### Build Steps
+
+1. Open the solution file:
+   - `MFCApplication17.sln`
+2. Select an appropriate configuration, such as Debug / x64.
+3. Build the solution.
+4. Run the generated executable.
+
 ---
 
-## 许可证
-GPL-V2.0
+## License
+
+GPL-2.0

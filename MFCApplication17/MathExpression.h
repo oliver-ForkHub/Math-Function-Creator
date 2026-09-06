@@ -8,44 +8,44 @@ using namespace std;
 class CMathExpression;
 class CVariable;
 extern vector<CMathExpression> g_vMathExpression;
-struct CInterval
+struct Interval
 {
 	float lo, hi;
 
-	CInterval(float _lo, float _hi) : lo(_lo), hi(_hi) {}
+	Interval(float _lo, float _hi) : lo(_lo), hi(_hi) {}
 
 	bool contains_zero() const
 	{
 		return lo <= 0 && 0 <= hi;
 	}
 
-	CInterval operator+(const CInterval& rhs) const
+	Interval operator+(const Interval& rhs) const
 	{
-		return CInterval(lo + rhs.lo, hi + rhs.hi);
+		return Interval(lo + rhs.lo, hi + rhs.hi);
 	}
 
-	CInterval operator-(const CInterval& rhs) const
+	Interval operator-(const Interval& rhs) const
 	{
-		return CInterval(lo - rhs.hi, hi - rhs.lo);
+		return Interval(lo - rhs.hi, hi - rhs.lo);
 	}
 
-	CInterval operator*(const CInterval& rhs) const
+	Interval operator*(const Interval& rhs) const
 	{
 		float values[4] = { lo * rhs.lo, lo * rhs.hi, hi * rhs.lo, hi * rhs.hi };
-		return CInterval(*min_element(values, values + 4), *max_element(values, values + 4));
+		return Interval(*min_element(values, values + 4), *max_element(values, values + 4));
 	}
 
-	CInterval operator/(const CInterval& rhs) const
+	Interval operator/(const Interval& rhs) const
 	{
 		if (rhs.contains_zero())
-			return CInterval(-numeric_limits<float>::infinity(), numeric_limits<float>::infinity());
-		return *this * CInterval(1.0f / rhs.hi, 1.0f / rhs.lo);
+			return Interval(-numeric_limits<float>::infinity(), numeric_limits<float>::infinity());
+		return *this * Interval(1.0f / rhs.hi, 1.0f / rhs.lo);
 	}
 
-	static CInterval sin(const CInterval& value)
+	static Interval sin(const Interval& value)
 	{
 		if (!isfinite(value.lo) || !isfinite(value.hi) || value.hi - value.lo >= 2 * M_PI)
-			return CInterval(-1, 1);
+			return Interval(-1, 1);
 
 		float lo = min(::sin(value.lo), ::sin(value.hi));
 		float hi = max(::sin(value.lo), ::sin(value.hi));
@@ -58,12 +58,12 @@ struct CInterval
 			else
 				lo = -1;
 		}
-		return CInterval(lo, hi);
+		return Interval(lo, hi);
 	}
 
-	static CInterval cos(const CInterval& value)
+	static Interval cos(const Interval& value)
 	{
-		return sin(CInterval(value.lo + M_PI / 2, value.hi + M_PI / 2));
+		return sin(Interval(value.lo + M_PI / 2, value.hi + M_PI / 2));
 	}
 };
 struct Rect
@@ -96,9 +96,9 @@ public:
 		}
 		m_vpVariable.clear();
 	}
-	CInterval calculate_interval(const vector<string>& vExpression, CInterval x_range, CInterval y_range) const
+	Interval calculate_interval(const vector<string>& vExpression, Interval x_range, Interval y_range) const
 	{
-		stack<CInterval> stk;
+		stack<Interval> stk;
 		for (const auto& token : vExpression)
 		{
 			int id = identify(token);
@@ -106,15 +106,15 @@ public:
 				stk.push(x_range);
 			else if (token == "y")
 				stk.push(y_range);
-			else if (id == 0 || (token[0] == '-' && token.length() > 1))
-				stk.push(CInterval(stof(token), stof(token)));
+			else if (id == 0 || (token[0] == '-' && token.length() > 1))//number
+				stk.push(Interval(stof(token), stof(token)));
 			else if (id >= 1 && id <= 3)
 			{
 				if (stk.size() < 2)
 					throw runtime_error("Invalid expression");
-				CInterval rhs = stk.top();
+				Interval rhs = stk.top();
 				stk.pop();
-				CInterval lhs = stk.top();
+				Interval lhs = stk.top();
 				stk.pop();
 				if (token == "+")
 					stk.push(lhs + rhs);
@@ -127,15 +127,15 @@ public:
 				else if (token == "^")
 				{
 					if (rhs.lo != rhs.hi || floor(rhs.lo) != rhs.lo)
-						stk.push(CInterval(-numeric_limits<float>::infinity(), numeric_limits<float>::infinity()));
+						stk.push(Interval(-numeric_limits<float>::infinity(), numeric_limits<float>::infinity()));
 					else
 					{
 						int exponent = static_cast<int>(rhs.lo);
-						CInterval result(1, 1);
+						Interval result(1, 1);
 						for (int i = 0; i < abs(exponent); ++i)
 							result = result * lhs;
 						if (exponent < 0)
-							result = CInterval(1, 1) / result;
+							result = Interval(1, 1) / result;
 						stk.push(result);
 					}
 				}
@@ -146,14 +146,14 @@ public:
 				{
 					if (stk.empty())
 						throw runtime_error("Invalid expression");
-					CInterval value = stk.top();
+					Interval value = stk.top();
 					stk.pop();
 					if (token == "sin")
-						stk.push(CInterval::sin(value));
+						stk.push(Interval::sin(value));
 					else if (token == "cos")
-						stk.push(CInterval::cos(value));
+						stk.push(Interval::cos(value));
 					else
-						stk.push(CInterval(-1, 1));
+						stk.push(Interval(-1, 1));
 				}
 				else
 					throw runtime_error("Unsupported interval function");
@@ -166,10 +166,10 @@ public:
 
 	bool contain_root(Rect scope, const vector<string>& vExpression)
 	{
-		CInterval value = calculate_interval(
+		Interval value = calculate_interval(
 			vExpression,
-			CInterval(min(scope.lx, scope.rx), max(scope.lx, scope.rx)),
-			CInterval(min(scope.dy, scope.uy), max(scope.dy, scope.uy)));
+			Interval(min(scope.lx, scope.rx), max(scope.lx, scope.rx)),
+			Interval(min(scope.dy, scope.uy), max(scope.dy, scope.uy)));
 		return value.contains_zero();
 	}
 	void find_root(Rect scope, const vector<string>& vExpression, vector<pair<float, float>>& roots, int nDepth = 0,CDC*pDC=NULL,CCoordinate coordinate=CCoordinate())
