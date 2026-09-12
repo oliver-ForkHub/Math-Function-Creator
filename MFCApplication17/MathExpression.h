@@ -365,7 +365,7 @@ public:
 		//pDC->LineTo(nOffsetX + vRoots[0].first / fZoom, nOffsetY + (-1) * vRoots[0].second / fZoom);
 		for (auto a : vRoots)
 		{
-			pDC->SetPixel(nOffsetX + a.first / fZoom, nOffsetY + (-1) * a.second / fZoom, RGB(0, 0, 0));
+			pDC->SetPixel(nOffsetX + a.first / fZoom, nOffsetY + (-1) * a.second / fZoom, m_color);
 			//pDC->Ellipse(nOffsetX + a.first / fZoom - 10, nOffsetY + (-1) * a.second / fZoom - 10, nOffsetX + a.first / fZoom + 10, nOffsetY + (-1) * a.second / fZoom + 10);
 		}
 	}
@@ -376,13 +376,17 @@ public:
 		int nOffsetX = coordinate.GetZeroPt().x, nOffsetY = coordinate.GetZeroPt().y;
 		float fZoom = coordinate.GetScale();
 
+		CPen pen;
+		pen.CreatePen(PS_SOLID, 1, m_color);
+		CPen* pOldPen = pDC->SelectObject(&pen);
+
 		for (int i = coordinate.GetBorder().left - nOffsetX; i < coordinate.GetBorder().right - nOffsetX; i++)
 		{
 			//stmp = func;
 			/*if (pos=stmp.find('x'))
 			{*/
 			//stmp.replace(pos, 1, "("+to_string(i * fZoom)+")");
-			
+
 			fPreviousResult = result((i - 1) * fZoom);
 			fResult = result(i * fZoom);
 			/*fPreviousResult = m_math.result(stmp, (i - 1) * fZoom);
@@ -401,12 +405,13 @@ public:
 					pDC->MoveTo(pt);
 				else
 					pDC->LineTo(pt);
-				pDC->SetPixel(pt.x, pt.y, RGB(0, 0, 0));
+				pDC->SetPixel(pt.x, pt.y, m_color);
 
 			}
 			//pDC->Ellipse(&rect);
 		//}
 		}
+		pDC->SelectObject(pOldPen);
 
 	}
 	void set_section_min(float min)
@@ -418,6 +423,14 @@ public:
 		m_fSection[1] = max;
 	}
 
+	void set_color(COLORREF color)
+	{
+		m_color = color;
+	}
+	COLORREF get_color() const
+	{
+		return m_color;
+	}
 
 	bool are_all_digits(const string& str) const {
 		if (str == "x") return true; // treat "x" as a number
@@ -636,4 +649,5 @@ protected:
 	unordered_map<string, int> m_map;
 	vector<CVariable*> m_vpVariable;
 	float m_fSection[2] = { 0,0 };
+	COLORREF m_color = RGB(0,0,0);
 };

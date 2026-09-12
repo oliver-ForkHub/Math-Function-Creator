@@ -220,28 +220,41 @@ void CPropertiesWnd::InitPropList()
 
 	CMFCPropertyGridProperty* pGroup1 = new CMFCPropertyGridProperty(_T("Appearance"));
 
-	pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("Caption"), (_variant_t)/*_T("About")*/m_currentStr, _T("Write a math function here")));
 	CMFCPropertyGridProperty* pProp = NULL;//new CMFCPropertyGridProperty(_T("Action"), _T("Run"), _T("One of: None, Thin, Resizable, or Dialog Frame"));
-
-	if (m_nCurrentType==1)
+	if (m_pCurrentItem != NULL)
 	{
-		pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("Value"), (_variant_t)((CVariable*)m_pCurrentItem)->get_value(), _T("Specifies the window's height")));
-		pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("Step"), (_variant_t)((CVariable*)m_pCurrentItem)->get_step(), _T("Specifies the window's height")));
-		pProp = new CMFCPropertyGridProperty(_T("Action"), ((CVariable*)m_pCurrentItem)->is_change()?_T("Run"):_T("Pause"), _T("One of: None, Thin, Resizable, or Dialog Frame"));
-		pProp->AddOption(_T("Run"));
-		pProp->AddOption(_T("Pause"));
-		//pProp->AddOption(_T("Resizable"));
-		//pProp->AddOption(_T("Dialog Frame"));
-		pProp->AllowEdit(FALSE);
+		if (m_nCurrentType == 0)
+		{
+			pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("Caption"), (_variant_t)/*_T("About")*/m_currentStr, _T("Write a math function here")));
 
-		pGroup1->AddSubItem(pProp);
+			//pGroup1->AddSubItem(new CMFCPropertyGridColorProperty(_T("Color"), RGB(0, 0, 0), NULL, _T("Color of function")));
+			CMFCPropertyGridColorProperty* pColorProp = new CMFCPropertyGridColorProperty(_T("Color"), RGB(0, 0, 0), NULL, _T("Color of function"));
+			pColorProp->EnableOtherButton(_T("Other..."));
+			pColorProp->EnableAutomaticButton(_T("Default"), RGB(0, 0, 0));
+			pGroup1->AddSubItem(pColorProp);
+		}
+
+		if (m_nCurrentType == 1)
+		{
+			pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("Caption"), (_variant_t)/*_T("About")*/m_currentStr, _T("Write a math function here")));
+
+			pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("Value"), (_variant_t)((CVariable*)m_pCurrentItem)->get_value(), _T("Specifies the window's height")));
+			pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("Step"), (_variant_t)((CVariable*)m_pCurrentItem)->get_step(), _T("Specifies the window's height")));
+			pProp = new CMFCPropertyGridProperty(_T("Action"), ((CVariable*)m_pCurrentItem)->is_change() ? _T("Run") : _T("Pause"), _T("Action to run or pause the variable"));
+			pProp->AddOption(_T("Run"));
+			pProp->AddOption(_T("Pause"));
+			//pProp->AddOption(_T("Resizable"));
+			//pProp->AddOption(_T("Dialog Frame"));
+			pProp->AllowEdit(FALSE);
+
+			pGroup1->AddSubItem(pProp);
+		}
+
 	}
-	
-	
-	//pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("Caption"), (_variant_t)_T("About"), _T("Specifies the text that will be displayed in the window's title bar")));
+		//pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("Caption"), (_variant_t)_T("About"), _T("Specifies the text that will be displayed in the window's title bar")));
 
-	m_wndPropList.AddProperty(pGroup1);
-
+		m_wndPropList.AddProperty(pGroup1);
+	
 	CMFCPropertyGridProperty* pSec = new CMFCPropertyGridProperty(_T("Section"), 0, TRUE);
 	if (m_pCurrentItem != NULL)
 	{
@@ -398,15 +411,14 @@ afx_msg LRESULT CPropertiesWnd::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 				m_currentStr = CA2W(str.c_str());
 				::PostMessage(m_classViewWnd, WM_USER_NOTIFY, NULL, NULL);
 			}
-			else if (name == L"Left")
-			{
-				pMath->set_section_min(stof(str));
-			}
-			else if (name == L"Right")
-			{
-				pMath->set_section_max(stof(str));
-			}
+		else if (name == L"Color")
+		{
+			long lcol = 0;
+			COleVariant var = pProp->GetValue();
+			try { var.ChangeType(VT_I4); lcol = var.lVal; } catch(...) { lcol = 0; }
+			pMath->set_color((COLORREF)lcol);
 		}
+	}
 	}
 	else if (m_nCurrentType == 1)
 	{
@@ -566,15 +578,26 @@ afx_msg LRESULT CPropertiesWnd::OnUserSelect(WPARAM wParam, LPARAM lParam)
 		{
 			pProp = pGroup->GetSubItem(i);
 			if (pProp == NULL) { return NULL; }
-			if ((str = pProp->GetName()) == L"Caption")
+			str = pProp->GetName();
+			if (str == L"Caption")
 			{
-				
 				pProp->SetValue(captionStr);
 				m_currentStr = captionStr;
-				
+			}
+			else if (str == L"Left")
+			{
+				pProp->SetValue((double)mathPara.get_section()[0]);
+			}
+			else if (str == L"Right")
+			{
+				pProp->SetValue((double)mathPara.get_section()[1]);
+			}
+			else if (str == L"Color")
+			{
+				pProp->SetValue((long)mathPara.get_color());
 			}
 		}
-		
+
 	}
 	return 0;
 
