@@ -36,3 +36,9 @@ jobs:
 
       - name: Build solution
         run: msbuild MFCApplication17.sln /p:Configuration=Release /p:Platform=x64
+        
+      - name: Upload exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: MFC-exe
+          path: x64/Release/*.exe
